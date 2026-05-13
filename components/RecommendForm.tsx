@@ -7,9 +7,15 @@ import { THEMES, STYLES } from "@/lib/types";
 
 type Result = {
   intro: string;
-  source: "claude" | "fallback";
+  source: "claude" | "kimi" | "fallback";
   picks: { artwork: Artwork; reason: string }[];
 };
+
+function sourceLabel(source: Result["source"]) {
+  if (source === "kimi") return "Kimi K2.5";
+  if (source === "claude") return "Claude Haiku 4.5";
+  return "本地规则回退";
+}
 
 function ChipGroup({
   label,
@@ -151,7 +157,7 @@ export function RecommendForm() {
           <div className="space-y-4">
             <div className="rounded-xl ring-1 ring-stone-200 bg-white p-4">
               <div className="text-xs text-stone-400 mb-1">
-                AI 引擎：{result.source === "claude" ? "Claude Haiku 4.5" : "本地规则回退"}
+                AI 引擎：{sourceLabel(result.source)}
               </div>
               <p className="text-sm text-stone-700">{result.intro}</p>
             </div>

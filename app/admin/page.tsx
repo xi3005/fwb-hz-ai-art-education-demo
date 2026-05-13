@@ -7,8 +7,14 @@ type Tags = {
   style: string[];
   form: string;
   difficulty: number;
-  source: "claude" | "fallback";
+  source: "claude" | "kimi" | "fallback";
 };
+
+function sourceLabel(source: Tags["source"]) {
+  if (source === "kimi") return "Kimi K2.5（多模态）";
+  if (source === "claude") return "Claude Haiku 4.5（多模态）";
+  return "本地回退";
+}
 
 export default function AdminPage() {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -122,8 +128,7 @@ export default function AdminPage() {
           {tags && (
             <div className="rounded-xl ring-1 ring-stone-200 bg-white p-4 space-y-3">
               <div className="text-xs text-stone-400">
-                AI 引擎：
-                {tags.source === "claude" ? "Claude Haiku 4.5 (多模态)" : "本地回退"}
+                AI 引擎：{sourceLabel(tags.source)}
               </div>
               <TagRow label="主题 theme" values={tags.theme} />
               <TagRow label="风格 style" values={tags.style} />

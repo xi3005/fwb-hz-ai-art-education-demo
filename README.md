@@ -43,12 +43,13 @@ npm run dev
 在 `.env.local` 中填入：
 
 ```bash
-ANTHROPIC_API_KEY=sk-ant-...
+MOONSHOT_API_KEY=ak-...
+KIMI_BASE_URL=https://api.moonshot.cn/v1
+KIMI_MODEL=kimi-k2.5
 ```
 
-- 推荐 / 自动打标签：Claude Haiku 4.5（`claude-haiku-4-5-20251001`）
-- 学习导览：Claude Sonnet 4.6（`claude-sonnet-4-6`，流式）
-- system prompt 启用 prompt caching，缓存 5 分钟，重复调用近似免费
+- 推荐 / 自动打标签 / 学习导览：Kimi K2.5（OpenAI-compatible Chat Completions，支持多模态与流式输出）
+- 也可改用 `ANTHROPIC_API_KEY=sk-ant-...`，代码会在没有 Kimi key 时走 Claude 备用路径
 
 未配置时，所有 AI 调用走本地规则回退，演示仍可完整跑通。
 
@@ -74,7 +75,8 @@ supabase/seed.sql
 
 - **Next.js 16** App Router + TypeScript + Tailwind v4
 - **Supabase**（Postgres + RLS）— 可选
-- **Anthropic Claude SDK** — Haiku 4.5（推荐/打标签）+ Sonnet 4.6（学习导览流式）
+- **Kimi / Moonshot API** — Kimi K2.5（推荐/打标签/学习导览流式）
+- **Anthropic Claude SDK** — 可选备用
 
 ---
 
@@ -82,6 +84,6 @@ supabase/seed.sql
 
 - 用户注册/登录、权限角色控制
 - 第三方平台对接（合同第一条第（4）款外部对接部分）
-- 真正的 ML 模型训练（用 Claude API 模拟"基础机器学习/规则增强模型"）
+- 真正的 ML 模型训练（用 Kimi / Claude API 模拟"基础机器学习/规则增强模型"）
 - 等保 2.0 测评（合同第十二条验收要求，对接测试阶段补齐）
 - 单元测试、CI/CD
