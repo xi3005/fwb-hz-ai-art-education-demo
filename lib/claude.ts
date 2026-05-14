@@ -63,7 +63,8 @@ async function kimiChat(messages: ChatMessage[], maxTokens: number, stream = fal
 async function kimiText(messages: ChatMessage[], maxTokens: number) {
   const res = await kimiChat(messages, maxTokens);
   const data = await res.json();
-  return String(data.choices?.[0]?.message?.content ?? "");
+  const message = data.choices?.[0]?.message;
+  return String(message?.content || message?.reasoning_content || "");
 }
 
 export type RecommendResult = {
@@ -83,9 +84,9 @@ export async function recommendArtworks(
           { role: "system", content: RECOMMEND_SYSTEM },
           { role: "user", content: buildRecommendUserMessage(pref, library) },
         ],
-        800,
+        2000,
       );
-      const json = JSON.parse(stripFences(text));
+      const json = parseJsonObject(text);
       return {
         intro: String(json.intro ?? "为你推荐："),
         picks: (json.picks ?? []).slice(0, 3).map((p: { id: string; reason: string }) => ({
@@ -121,7 +122,7 @@ export async function recommendArtworks(
       .filter((c): c is Anthropic.TextBlock => c.type === "text")
       .map((c) => c.text)
       .join("");
-    const json = JSON.parse(stripFences(text));
+    const json = parseJsonObject(text);
     return {
       intro: String(json.intro ?? "为你推荐："),
       picks: (json.picks ?? []).slice(0, 3).map((p: { id: string; reason: string }) => ({
@@ -162,9 +163,9 @@ export async function autoTag(
             ],
           },
         ],
-        300,
+        1000,
       );
-      const json = JSON.parse(stripFences(text));
+      const json = parseJsonObject(text);
       return {
         theme: Array.isArray(json.theme) ? json.theme : [String(json.theme)],
         style: Array.isArray(json.style) ? json.style : [String(json.style)],
@@ -201,7 +202,7 @@ export async function autoTag(
       .filter((c): c is Anthropic.TextBlock => c.type === "text")
       .map((c) => c.text)
       .join("");
-    const json = JSON.parse(stripFences(text));
+    const json = parseJsonObject(text);
     return {
       theme: Array.isArray(json.theme) ? json.theme : [String(json.theme)],
       style: Array.isArray(json.style) ? json.style : [String(json.style)],
@@ -307,6 +308,23 @@ function stripFences(text: string) {
     .replace(/^```(?:json)?\s*/i, "")
     .replace(/```$/i, "")
     .trim();
+}
+
+function parseJsonObject(text: string) {
+  const stripped = stripFences(text);
+  try {
+    return JSON.parse(stripped);
+  } catch {
+    const fenced = stripped.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1];
+    if (fenced) return JSON.parse(fenced.trim());
+
+    const start = stripped.indexOf("{");
+    const end = stripped.lastIndexOf("}");
+    if (start >= 0 && end > start) {
+      return JSON.parse(stripped.slice(start, end + 1));
+    }
+    throw new Error("No JSON object found in model response");
+  }
 }
 
 function fallbackRecommend(pref: UserPreference, library: Artwork[]): RecommendResult {
