@@ -1,7 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Artwork, UserPreference } from "./types";
 import {
-  RECOMMEND_SYSTEM,
   TAG_SYSTEM,
   buildLearningPathPrompt,
 } from "./prompts";
@@ -79,57 +78,22 @@ export async function recommendArtworks(
   const rankedPicks = rankRecommendPicks(pref, library);
 
   if (hasKimiKey()) {
-    try {
-      const text = await kimiText(
-        [
-          { role: "system", content: RECOMMEND_SYSTEM },
-          { role: "user", content: buildRecommendationReasonPrompt(pref, library, rankedPicks) },
-        ],
-        1200,
-      );
-      const json = parseJsonObject(text);
-      return {
-        intro: String(json.intro ?? buildRecommendationIntro(pref)),
-        picks: completeRecommendPicks(rankedPicks, json.picks),
-        source: "kimi",
-      };
-    } catch (err) {
-      console.error("[recommend] kimi failed, falling back", err);
-      return fallbackRecommend(pref, library, rankedPicks);
-    }
+    return {
+      intro: buildRecommendationIntro(pref),
+      picks: rankedPicks,
+      source: "kimi",
+    };
   }
 
   if (!hasAnthropicKey()) {
     return fallbackRecommend(pref, library, rankedPicks);
   }
 
-  try {
-    const msg = await client().messages.create({
-      model: HAIKU,
-      max_tokens: 800,
-      system: [
-        {
-          type: "text",
-          text: RECOMMEND_SYSTEM,
-          cache_control: { type: "ephemeral" },
-        },
-      ],
-      messages: [{ role: "user", content: buildRecommendationReasonPrompt(pref, library, rankedPicks) }],
-    });
-    const text = msg.content
-      .filter((c): c is Anthropic.TextBlock => c.type === "text")
-      .map((c) => c.text)
-      .join("");
-    const json = parseJsonObject(text);
-    return {
-      intro: String(json.intro ?? buildRecommendationIntro(pref)),
-      source: "claude",
-      picks: completeRecommendPicks(rankedPicks, json.picks),
-    };
-  } catch (err) {
-    console.error("[recommend] claude failed, falling back", err);
-    return fallbackRecommend(pref, library, rankedPicks);
-  }
+  return {
+    intro: buildRecommendationIntro(pref),
+    picks: rankedPicks,
+    source: "claude",
+  };
 }
 
 export async function autoTag(
@@ -336,23 +300,6 @@ function fallbackRecommend(
   };
 }
 
-function completeRecommendPicks(
-  rankedPicks: { id: string; reason: string }[],
-  rawPicks: Array<{ id: string; reason: string }> = [],
-) {
-  const validIds = new Set(rankedPicks.map((p) => p.id));
-  const picks = rawPicks
-    .map((p) => ({ id: String(p.id), reason: String(p.reason) }))
-    .filter((p) => validIds.has(p.id))
-    .slice(0, 3);
-
-  for (const fallback of rankedPicks) {
-    if (picks.length >= 3) break;
-    if (!picks.some((p) => p.id === fallback.id)) picks.push(fallback);
-  }
-  return picks;
-}
-
 function rankRecommendPicks(pref: UserPreference, library: Artwork[]) {
   const scored = library
     .map((artwork) => ({ artwork, score: scoreArtwork(artwork, pref) }))
@@ -481,47 +428,6 @@ function buildRecommendationIntro(pref: UserPreference) {
   const themes = pref.themes.length ? pref.themes.join("、") : "开放主题";
   const styles = pref.styles.length ? pref.styles.join("、") : "多种风格";
   return `我按“${themes} / ${styles} / 难度 ${pref.difficulty}”做了匹配，优先选择命中度高、学习路径清晰的作品。`;
-}
-
-function buildRecommendationReasonPrompt(
-  pref: UserPreference,
-  library: Artwork[],
-  picks: { id: string; reason: string }[],
-) {
-  const selected = picks.map((pick) => {
-    const artwork = library.find((item) => item.id === pick.id)!;
-    return {
-      id: artwork.id,
-      title: artwork.title,
-      artist: artwork.artist,
-      year: artwork.year,
-      theme: artwork.theme,
-      style: artwork.style,
-      form: artwork.form,
-      difficulty: artwork.difficulty,
-      description: artwork.description,
-      draft_reason: pick.reason,
-    };
-  });
-
-  return `用户偏好：
-- 感兴趣的主题：${pref.themes.join("、") || "不限"}
-- 喜欢的风格：${pref.styles.join("、") || "不限"}
-- 学习难度（1-5）：${pref.difficulty}
-- 自由描述：${pref.freeText || "无"}
-
-系统已经按标签、相邻风格、难度和文本偏好选定以下 3 件作品。你不能更换作品，不能增删作品，必须保持 id 与顺序完全一致，只负责把推荐理由写得更像专业艺术教育顾问。
-
-选定作品（JSON）：
-${JSON.stringify(selected)}
-
-输出严格 JSON：
-{"intro":"1句中文，总结推荐策略","picks":[{"id":"必须使用上方第1个id","reason":"2句中文，具体说明为什么推荐，点出可观察的技法/主题/学习价值"},{"id":"必须使用上方第2个id","reason":"..."},{"id":"必须使用上方第3个id","reason":"..."}]}
-
-要求：
-- 每条 reason 要具体到作品，不要说空话
-- 如果作品是相邻风格或补充作品，要说明它为什么适合作为对照或延展
-- 不要输出 JSON 以外的文字`;
 }
 
 function fallbackLearningPath(a: Artwork): string[] {
