@@ -10,7 +10,7 @@ import {
 const HAIKU = "claude-haiku-4-5-20251001";
 const SONNET = "claude-sonnet-4-6";
 const KIMI_BASE_URL = process.env.KIMI_BASE_URL ?? "https://api.moonshot.cn/v1";
-const KIMI_MODEL = process.env.KIMI_MODEL ?? "kimi-k2.5";
+const KIMI_MODEL = process.env.KIMI_MODEL ?? "moonshot-v1-8k-vision-preview";
 
 type AiSource = "claude" | "kimi" | "fallback";
 type ChatMessage = {
@@ -89,10 +89,7 @@ export async function recommendArtworks(
       const json = parseJsonObject(text);
       return {
         intro: String(json.intro ?? "为你推荐："),
-        picks: (json.picks ?? []).slice(0, 3).map((p: { id: string; reason: string }) => ({
-          id: String(p.id),
-          reason: String(p.reason),
-        })),
+        picks: completeRecommendPicks(pref, library, json.picks),
         source: "kimi",
       };
     } catch (err) {
@@ -125,11 +122,8 @@ export async function recommendArtworks(
     const json = parseJsonObject(text);
     return {
       intro: String(json.intro ?? "为你推荐："),
-      picks: (json.picks ?? []).slice(0, 3).map((p: { id: string; reason: string }) => ({
-        id: String(p.id),
-        reason: String(p.reason),
-      })),
       source: "claude",
+      picks: completeRecommendPicks(pref, library, json.picks),
     };
   } catch (err) {
     console.error("[recommend] claude failed, falling back", err);
@@ -347,6 +341,24 @@ function fallbackRecommend(pref: UserPreference, library: Artwork[]): RecommendR
     picks,
     source: "fallback",
   };
+}
+
+function completeRecommendPicks(
+  pref: UserPreference,
+  library: Artwork[],
+  rawPicks: Array<{ id: string; reason: string }> = [],
+) {
+  const validIds = new Set(library.map((a) => a.id));
+  const picks = rawPicks
+    .map((p) => ({ id: String(p.id), reason: String(p.reason) }))
+    .filter((p) => validIds.has(p.id))
+    .slice(0, 3);
+
+  for (const fallback of fallbackRecommend(pref, library).picks) {
+    if (picks.length >= 3) break;
+    if (!picks.some((p) => p.id === fallback.id)) picks.push(fallback);
+  }
+  return picks;
 }
 
 function fallbackLearningPath(a: Artwork): string[] {

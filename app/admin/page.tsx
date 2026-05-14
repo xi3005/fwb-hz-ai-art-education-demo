@@ -11,7 +11,7 @@ type Tags = {
 };
 
 function sourceLabel(source: Tags["source"]) {
-  if (source === "kimi") return "Kimi K2.5（多模态）";
+  if (source === "kimi") return "Kimi / Moonshot（多模态）";
   if (source === "claude") return "Claude Haiku 4.5（多模态）";
   return "本地回退";
 }

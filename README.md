@@ -45,10 +45,10 @@ npm run dev
 ```bash
 MOONSHOT_API_KEY=ak-...
 KIMI_BASE_URL=https://api.moonshot.cn/v1
-KIMI_MODEL=kimi-k2.5
+KIMI_MODEL=moonshot-v1-8k-vision-preview
 ```
 
-- 推荐 / 自动打标签 / 学习导览：Kimi K2.5（OpenAI-compatible Chat Completions，支持多模态与流式输出）
+- 推荐 / 自动打标签 / 学习导览：Kimi / Moonshot OpenAI-compatible Chat Completions（支持多模态与流式输出）
 - 也可改用 `ANTHROPIC_API_KEY=sk-ant-...`，代码会在没有 Kimi key 时走 Claude 备用路径
 
 未配置时，所有 AI 调用走本地规则回退，演示仍可完整跑通。

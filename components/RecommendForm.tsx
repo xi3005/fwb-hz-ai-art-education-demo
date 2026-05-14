@@ -12,7 +12,7 @@ type Result = {
 };
 
 function sourceLabel(source: Result["source"]) {
-  if (source === "kimi") return "Kimi K2.5";
+  if (source === "kimi") return "Kimi / Moonshot";
   if (source === "claude") return "Claude Haiku 4.5";
   return "本地规则回退";
 }
