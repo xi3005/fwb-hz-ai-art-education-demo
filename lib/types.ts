@@ -39,6 +39,7 @@ export const THEMES = [
 
 export const STYLES = [
   "中国传统",
+  "浮世绘",
   "文艺复兴",
   "巴洛克",
   "印象派",

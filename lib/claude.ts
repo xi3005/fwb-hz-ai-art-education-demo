@@ -323,23 +323,32 @@ function scoreArtwork(artwork: Artwork, pref: UserPreference) {
   );
   const textHits = freeTextHits(artwork, pref.freeText ?? "");
   const difficultyGap = Math.abs(artwork.difficulty - pref.difficulty);
+  const hasThemeRequest = pref.themes.length > 0;
+  const hasStyleRequest = pref.styles.length > 0;
+  const exactComboBonus =
+    exactThemeHits.length > 0 && exactStyleHits.length > 0 ? 120 : 0;
+  const missingThemePenalty = hasThemeRequest && !exactThemeHits.length ? 28 : 0;
+  const missingStylePenalty = hasStyleRequest && !exactStyleHits.length ? 36 : 0;
 
   return (
-    exactStyleHits.length * 48 +
-    exactThemeHits.length * 36 +
-    relatedStyleHits.length * 24 +
-    relatedThemeHits.length * 12 +
-    Math.max(0, 16 - difficultyGap * 5) +
-    textHits * 8
+    exactComboBonus +
+    exactStyleHits.length * 82 +
+    exactThemeHits.length * 68 +
+    relatedStyleHits.length * 12 +
+    relatedThemeHits.length * 8 +
+    Math.max(0, 20 - difficultyGap * 6) +
+    textHits * 10 -
+    missingThemePenalty -
+    missingStylePenalty
   );
 }
 
 function relatedStyles(style: string) {
   const map: Record<string, string[]> = {
-    印象派: ["后印象派", "现代主义"],
+    印象派: ["后印象派", "浮世绘", "现代主义"],
     后印象派: ["印象派", "表现主义", "现代主义"],
     现代主义: ["后印象派", "表现主义", "抽象艺术", "立体主义", "超现实主义"],
-    中国传统: ["印象派"],
+    浮世绘: ["印象派", "现代主义"],
     巴洛克: ["文艺复兴"],
     文艺复兴: ["巴洛克"],
     抽象艺术: ["现代主义", "立体主义"],

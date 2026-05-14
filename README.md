@@ -67,7 +67,7 @@ supabase/migrations/0001_init.sql
 supabase/seed.sql
 ```
 
-未配置时，数据源退化为 `lib/artworks-data.ts` 中的 17 件本地种子作品。
+未配置时，数据源退化为 `lib/artworks-data.ts` 中的 20 件本地种子作品。
 
 ---
 
@@ -75,7 +75,7 @@ supabase/seed.sql
 
 - **Next.js 16** App Router + TypeScript + Tailwind v4
 - **Supabase**（Postgres + RLS）— 可选
-- **Kimi / Moonshot API** — Kimi K2.5（推荐/打标签/学习导览流式）
+- **Kimi / Moonshot API** — Moonshot Vision Preview（推荐/打标签/学习导览流式）
 - **Anthropic Claude SDK** — 可选备用
 
 ---

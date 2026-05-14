@@ -41,7 +41,7 @@ export const SEED_ARTWORKS: Artwork[] = [
     description:
       "《富岳三十六景》系列代表作。浮世绘版画的构图美学影响了印象派与现代设计。",
     theme: ["自然"],
-    style: ["中国传统"],
+    style: ["浮世绘"],
     form: "版画",
     difficulty: 1,
   },
@@ -223,6 +223,45 @@ export const SEED_ARTWORKS: Artwork[] = [
     style: ["后印象派"],
     form: "油画",
     difficulty: 1,
+  },
+  {
+    id: "11111111-1111-1111-1111-000000000018",
+    title: "芙蓉锦鸡图",
+    artist: "赵佶",
+    year: 1110,
+    image_url: wikimedia("赵佶芙蓉锦鸡图轴.png"),
+    description:
+      "宋徽宗院体花鸟画代表作，以芙蓉、锦鸡和蝴蝶组织画面，线条精谨、设色雅致，适合入门理解中国花鸟画的观察方法。",
+    theme: ["花鸟", "自然"],
+    style: ["中国传统"],
+    form: "国画",
+    difficulty: 1,
+  },
+  {
+    id: "11111111-1111-1111-1111-000000000019",
+    title: "枇杷山鸟图",
+    artist: "林椿",
+    year: 1180,
+    image_url: wikimedia("林椿枇杷山鸟图页.png"),
+    description:
+      "南宋小品花鸟画名作，以一枝枇杷和栖鸟构成近景，画面安静克制，便于讲解折枝构图、留白和细腻设色。",
+    theme: ["花鸟", "自然"],
+    style: ["中国传统"],
+    form: "国画",
+    difficulty: 1,
+  },
+  {
+    id: "11111111-1111-1111-1111-000000000020",
+    title: "写生珍禽图",
+    artist: "黄筌",
+    year: 960,
+    image_url: wikimedia("Huang-Quan-Xie-sheng-zhen-qin-tu.jpg"),
+    description:
+      "五代花鸟画代表作，细致描绘多种禽鸟、昆虫与草木，可作为中国花鸟画写生传统和精微观察训练的入门样本。",
+    theme: ["花鸟", "自然"],
+    style: ["中国传统"],
+    form: "国画",
+    difficulty: 2,
   },
 ];
 
