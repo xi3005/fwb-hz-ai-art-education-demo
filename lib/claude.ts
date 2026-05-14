@@ -49,7 +49,7 @@ async function kimiChat(messages: ChatMessage[], maxTokens: number, stream = fal
       model: KIMI_MODEL,
       messages,
       max_tokens: maxTokens,
-      temperature: 0.4,
+      temperature: 1,
       stream,
     }),
   });
